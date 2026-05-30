@@ -4,22 +4,102 @@
 // la categoría y el color de cada zapato.
 // ============================================================
 const zapatos = [
-  { id:1,  nombre:"Runner Pro",      categoria:"Deportivo", color:"Negro",  precio:1299, calificacion:4.8, nuevo:false, descripcion:"Zapatilla ligera y amortiguada para correr. Suela de goma de alta durabilidad.",                    imagen:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=75" },
-  { id:2,  nombre:"Sprint Air",      categoria:"Deportivo", color:"Blanco", precio:1399, calificacion:4.7, nuevo:false, descripcion:"Maxima respiracion y comodidad en cada paso. Ideal para entrenar con estilo.",                      imagen:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=75" },
-  { id:3,  nombre:"Trail Flex",      categoria:"Deportivo", color:"Gris",   precio:1199, calificacion:4.6, nuevo:false, descripcion:"Soporte extra para terrenos irregulares. Perfecto para senderismo y aventura.",                     imagen:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&q=75" },
-  { id:4,  nombre:"Energy Max",      categoria:"Deportivo", color:"Azul",   precio:1499, calificacion:4.9, nuevo:true,  descripcion:"Diseno moderno con tecnologia de amortiguacion avanzada para maratones.",                          imagen:"https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=75" },
-  { id:5,  nombre:"City Casual",     categoria:"Casual",    color:"Blanco", precio:999,  calificacion:4.5, nuevo:false, descripcion:"Minimalismo urbano. Combina con cualquier outfit del dia a dia.",                                   imagen:"https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&q=75" },
-  { id:6,  nombre:"Minimal Step",    categoria:"Casual",    color:"Negro",  precio:1099, calificacion:4.6, nuevo:false, descripcion:"Versatilidad y diseno limpio. Del trabajo al fin de semana sin esfuerzo.",                          imagen:"https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&q=75" },
-  { id:7,  nombre:"Loft Street",     categoria:"Casual",    color:"Cafe",   precio:959,  calificacion:4.4, nuevo:false, descripcion:"Cuero suave y suela confortable. El companero perfecto para tus paseos.",                          imagen:"https://images.unsplash.com/photo-1478186000828-f21db88c2d7d?w=600&q=75" },
-  { id:8,  nombre:"Weekend Easy",    categoria:"Casual",    color:"Gris",   precio:899,  calificacion:4.3, nuevo:false, descripcion:"Ligero, fresco y perfecto para el fin de semana. Sin pretensiones, pura comodidad.",               imagen:"https://images.unsplash.com/photo-1507464098880-e367bc5d2c08?w=600&q=75" },
-  { id:9,  nombre:"Oxford Classic",  categoria:"Formal",    color:"Cafe",   precio:1499, calificacion:4.9, nuevo:false, descripcion:"Elegancia atemporal. Cuero genuino cosido a mano, ideal para reuniones importantes.",              imagen:"https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=600&q=75" },
-  { id:10, nombre:"Executive Shine", categoria:"Formal",    color:"Negro",  precio:1699, calificacion:4.8, nuevo:true,  descripcion:"El calzado del profesional exigente. Acabado espejo y plantilla de cuero genuino.",                imagen:"https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=600&q=75" },
-  { id:11, nombre:"Prestige Court",  categoria:"Formal",    color:"Negro",  precio:1599, calificacion:4.7, nuevo:false, descripcion:"Estilo sobrio, comodo y profesional. De la oficina a la cena sin cambiar.",                        imagen:"https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&q=75" },
-  { id:12, nombre:"Atlas Formal",    categoria:"Formal",    color:"Gris",   precio:1549, calificacion:4.6, nuevo:false, descripcion:"Un toque moderno para cualquier ocasion importante. Diseno italiano clasico.",                      imagen:"https://images.unsplash.com/photo-1631984564919-1f6c8f8c4e71?w=600&q=75" },
-  { id:13, nombre:"Verano Breezy",   categoria:"Sandalia",  color:"Azul",   precio:899,  calificacion:4.5, nuevo:false, descripcion:"Fresca y comoda para los dias calidos. Correas ajustables y suela antideslizante.",               imagen:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=600&q=75" },
-  { id:14, nombre:"Playa Sol",       categoria:"Sandalia",  color:"Blanco", precio:849,  calificacion:4.4, nuevo:false, descripcion:"Ideal para salidas al sol, playa y dias relajados. Ligera como el aire.",                          imagen:"https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=600&q=75" },
-  { id:15, nombre:"Ibiza Open",      categoria:"Sandalia",  color:"Negro",  precio:929,  calificacion:4.6, nuevo:true,  descripcion:"Diseno abierto con detalle metalico. De la terraza al restaurante con el mismo par.",              imagen:"https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=600&q=75" },
-  { id:16, nombre:"Terra Summer",    categoria:"Sandalia",  color:"Cafe",   precio:879,  calificacion:4.3, nuevo:false, descripcion:"Cuero vegano suave con acabados naturales. Comodidad que respeta el medio ambiente.",               imagen:"https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=600&q=75" }
+  {
+    id:1, nombre:"Runner Pro", categoria:"Deportivo", color:"Negro",
+    precio:1299, calificacion:4.8, nuevo:false,
+    descripcion:"Zapatilla ligera y amortiguada para correr. Suela de goma de alta durabilidad.",
+    imagen:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=75"
+  },
+  {
+    id:2, nombre:"Sprint Air", categoria:"Deportivo", color:"Blanco",
+    precio:1399, calificacion:4.7, nuevo:false,
+    descripcion:"Máxima respiración y comodidad en cada paso. Ideal para entrenar con estilo.",
+    imagen:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=75"
+  },
+  {
+    id:3, nombre:"Trail Flex", categoria:"Deportivo", color:"Gris",
+    precio:1199, calificacion:4.6, nuevo:false,
+    descripcion:"Soporte extra para terrenos irregulares. Perfecto para senderismo y aventura.",
+    imagen:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&q=75"
+  },
+  {
+    id:4, nombre:"Energy Max", categoria:"Deportivo", color:"Azul",
+    precio:1499, calificacion:4.9, nuevo:true,
+    descripcion:"Diseño moderno con tecnología de amortiguación avanzada para maratones.",
+    imagen:"https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=75"
+  },
+  {
+    id:5, nombre:"City Casual", categoria:"Casual", color:"Blanco",
+    precio:999, calificacion:4.5, nuevo:false,
+    descripcion:"Minimalismo urbano. Combina con cualquier outfit del día a día.",
+    imagen:"https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&q=75"
+  },
+  {
+    id:6, nombre:"Minimal Step", categoria:"Casual", color:"Negro",
+    precio:1099, calificacion:4.6, nuevo:false,
+    descripcion:"Versatilidad y diseño limpio. Del trabajo al fin de semana sin esfuerzo.",
+    imagen:"https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&q=75"
+  },
+  {
+    id:7, nombre:"Loft Street", categoria:"Casual", color:"Cafe",
+    precio:959, calificacion:4.4, nuevo:false,
+    descripcion:"Cuero suave y suela confortable. El compañero perfecto para tus paseos.",
+    imagen:"https://images.unsplash.com/photo-1478186000828-f21db88c2d7d?w=600&q=75"
+  },
+  {
+    id:8, nombre:"Weekend Easy", categoria:"Casual", color:"Gris",
+    precio:899, calificacion:4.3, nuevo:false,
+    descripcion:"Ligero, fresco y perfecto para el fin de semana. Sin pretensiones, pura comodidad.",
+    imagen:"https://images.unsplash.com/photo-1507464098880-e367bc5d2c08?w=600&q=75"
+  },
+  {
+    id:9, nombre:"Oxford Classic", categoria:"Formal", color:"Cafe",
+    precio:1499, calificacion:4.9, nuevo:false,
+    descripcion:"Elegancia atemporal. Cuero genuino cosido a mano, ideal para reuniones importantes.",
+    imagen:"https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=600&q=75"
+  },
+  {
+    id:10, nombre:"Executive Shine", categoria:"Formal", color:"Negro",
+    precio:1699, calificacion:4.8, nuevo:true,
+    descripcion:"El calzado del profesional exigente. Acabado espejo y plantilla de cuero genuino.",
+    imagen:"https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=600&q=75"
+  },
+  {
+    id:11, nombre:"Prestige Court", categoria:"Formal", color:"Negro",
+    precio:1599, calificacion:4.7, nuevo:false,
+    descripcion:"Estilo sobrio, cómodo y profesional. De la oficina a la cena sin cambiar.",
+    imagen:"https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&q=75"
+  },
+  {
+    id:12, nombre:"Atlas Formal", categoria:"Formal", color:"Gris",
+    precio:1549, calificacion:4.6, nuevo:false,
+    descripcion:"Un toque moderno para cualquier ocasión importante. Diseño italiano clásico.",
+    imagen:"https://images.unsplash.com/photo-1631984564919-1f6c8f8c4e71?w=600&q=75"
+  },
+  {
+    id:13, nombre:"Verano Breezy", categoria:"Sandalia", color:"Azul",
+    precio:899, calificacion:4.5, nuevo:false,
+    descripcion:"Fresca y cómoda para los días cálidos. Correas ajustables y suela antideslizante.",
+    imagen:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=600&q=75"
+  },
+  {
+    id:14, nombre:"Playa Sol", categoria:"Sandalia", color:"Blanco",
+    precio:849, calificacion:4.4, nuevo:false,
+    descripcion:"Ideal para salidas al sol, playa y días relajados. Ligera como el aire.",
+    imagen:"https://images.unsplash.com/photo-1574634534894-89d7576c8259?w=600&q=75"
+  },
+  {
+    id:15, nombre:"Ibiza Open", categoria:"Sandalia", color:"Negro",
+    precio:929, calificacion:4.6, nuevo:true,
+    descripcion:"Diseño abierto con detalle metálico. De la terraza al restaurante con el mismo par.",
+    imagen:"https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=600&q=75"
+  },
+  {
+    id:16, nombre:"Terra Summer", categoria:"Sandalia", color:"Cafe",
+    precio:879, calificacion:4.3, nuevo:false,
+    descripcion:"Cuero vegano suave con acabados naturales. Comodidad que respeta el medio ambiente.",
+    imagen:"https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=600&q=75"
+  }
 ];
 
 const coloresHex = { Negro:"#1a1a1a", Blanco:"#f5f5f5", Cafe:"#7b5c3e", Gris:"#9ca3af", Azul:"#2563eb" };

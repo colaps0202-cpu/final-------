@@ -137,6 +137,37 @@
       .historial-panel { display: none; }
       .seccion-problema__inner { grid-template-columns: 1fr; gap: 2rem; }
     }
+    /* PILA: estilos añadidos solicitados */
+    #vistos-section { transition: opacity 0.4s ease; }
+    .historial-panel {
+      position: fixed; top: 70px; left: 1rem; z-index: 90;
+      background: white; border: 1px solid #e5e7eb; border-radius: 14px;
+      padding: 0.75rem; width: 190px; box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .historial-panel__titulo {
+      font-weight: 700; font-size: 0.65rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #6b7280; margin-bottom: 0.5rem;
+      padding-bottom: 0.4rem; border-bottom: 1px solid #f3f4f6;
+    }
+    .historial-item {
+      padding: 0.35rem 0.5rem; border-radius: 6px;
+      font-size: 0.7rem; display: flex; align-items: center; gap: 0.4rem;
+      color: #3d3d3d; background: #f9fafb; margin-bottom: 0.25rem;
+    }
+    .historial-item:first-child {
+      background: #fef9ee; border: 1px solid #f5e6c8;
+      color: #7c5c1a; font-weight: 700;
+    }
+    .historial-item__num {
+      width: 16px; height: 16px; background: #e5e7eb; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0; color: #6b7280;
+    }
+    .historial-item:first-child .historial-item__num {
+      background: var(--acento); color: var(--negro);
+    }
+    .historial-vacio { color: #9ca3af; font-size: 0.68rem; font-style: italic; }
+    @media (max-width: 768px) { .historial-panel { display: none; } }
   </style>
 </head>
 <body>
@@ -149,7 +180,6 @@
     <div class="navbar__links">
       <a href="#catalogo-section">Catalogo</a>
       <a href="#categorias-section">Categorias</a>
-      <a href="#problema-section">Problematica</a>
       <a href="#nosotros-section">Nosotros</a>
     </div>
     <button class="navbar__carrito" id="btn-carrito" aria-label="Ver carrito">
@@ -192,40 +222,7 @@
 
   <main>
 
-    <section id="problema-section" class="seccion-problema">
-      <div class="seccion-problema__inner">
-        <div>
-          <p class="hero__eyebrow" style="color:var(--acento)">La problematica</p>
-          <h2>Comprar zapatos en linea es<br/><em>un riesgo innecesario</em></h2>
-          <p>El 67% de los compradores en linea de calzado devuelven su compra por haber elegido el modelo equivocado. El problema no es el catalogo: es la falta de orientacion personalizada durante la decision de compra.</p>
-          <p>Los filtros estandar de categoria y color no son suficientes. El comprador necesita saber si un zapato es adecuado para su estilo de vida, su ocasion de uso y su presupuesto, sin tener que recorrer toda la tienda para saberlo.</p>
-          <p style="color:rgba(255,255,255,0.5);font-size:0.82rem"><strong style="color:var(--acento)">Solucion:</strong> El Paso integra un asistente conversacional que conoce todo el catalogo y guia al comprador hacia el par correcto antes de que llegue al carrito.</p>
-        </div>
-        <div class="problema-cards">
-          <div class="problema-card">
-            <div class="problema-card__icon">X</div>
-            <div>
-              <h4>Sin orientacion personalizada</h4>
-              <p>Los catalogos muestran todos los productos igual. El comprador no sabe cual es el mas adecuado para su necesidad especifica.</p>
-            </div>
-          </div>
-          <div class="problema-card">
-            <div class="problema-card__icon">~</div>
-            <div>
-              <h4>Altas tasas de devolucion</h4>
-              <p>El calzado es el producto con mayor devolucion en e-commerce. La causa principal: malas decisiones de compra por desinformacion.</p>
-            </div>
-          </div>
-          <div class="problema-card">
-            <div class="problema-card__icon">OK</div>
-            <div>
-              <h4>Nuestra solucion: asesor IA</h4>
-              <p>Un chatbot que conoce el catalogo completo y responde preguntas en tiempo real para ayudarte a elegir el par correcto.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    
 
     <section id="categorias-section" class="seccion">
       <div class="seccion__cabecera">
@@ -315,6 +312,13 @@
     </section>
 
   </main>
+    <section id="vistos-section" class="seccion" style="display:none">
+      <div class="seccion__cabecera">
+        <h2 class="seccion__titulo">Vistos recientemente</h2>
+        <p class="seccion__subtitulo">Zapatos que exploraste — guardados en la Pila (Stack LIFO)</p>
+      </div>
+      <div id="vistos-catalogo" class="catalogo"></div>
+    </section>
 
   <footer class="footer">
     <div class="footer__contenido">
@@ -377,11 +381,10 @@
   <div id="toast" class="toast oculto"><span id="toast-msg"></span></div>
 
   <div class="historial-panel" id="historial-panel">
-    <div class="historial-panel__titulo">Pila de navegacion</div>
+    <div class="historial-panel__titulo">Stack — Pila LIFO</div>
     <div class="historial-panel__lista" id="historial-lista">
-      <span class="historial-vacio">Sin historial aun</span>
+      <span class="historial-vacio">Abre un zapato para ver la pila en accion</span>
     </div>
-    <button class="historial-btn-volver" onclick="volverAtras()">Volver</button>
   </div>
 
   <button class="chat-fab" id="chat-fab" title="Asesor virtual">
@@ -413,79 +416,79 @@
 
   <script src="app.js"></script>
   <script>
-    // ================================================================
-    // ESTRUCTURA DE DATOS 1: PILA (Stack) — LIFO
-    // Guarda el historial de filtros del catalogo.
-    // LIFO: lo ultimo en entrar es lo primero en salir.
-    // Cada vez que el usuario filtra, el estado anterior se guarda.
-    // Al presionar Volver, se recupera ese estado con pop().
-    // ================================================================
-    const MAX_PILA = 5;
-    let pilaHistorial = [];
+// ================================================================
+// PILA (Stack) — LIFO
+// Guarda los últimos zapatos que el usuario abrió en el modal.
+// LIFO: el último zapato visto aparece primero en la pila.
+// Push al abrir modal, Pop automático cuando supera 5 elementos.
+// ================================================================
 
-    // PUSH: empuja un estado a la cima de la pila
-    function pushHistorial(estado) {
-      if (pilaHistorial.length >= MAX_PILA) pilaHistorial.shift();
-      pilaHistorial.push(estado);
-      renderHistorialPanel();
-    }
+var MAX_PILA = 5;
+var pilaVistos = []; // La pila como arreglo JavaScript
 
-    // POP: saca el estado de la cima de la pila
-    function popHistorial() {
-      if (pilaHistorial.length === 0) return null;
-      var estado = pilaHistorial.pop();
-      renderHistorialPanel();
-      return estado;
-    }
+// PUSH: agrega un zapato a la cima de la pila
+function pushVisto(zapato) {
+  // Evitar duplicados: si ya está, lo removemos primero
+  pilaVistos = pilaVistos.filter(function(z) { return z.id !== zapato.id; });
+  // Si la pila está llena, POP del más antiguo (índice 0)
+  if (pilaVistos.length >= MAX_PILA) {
+    pilaVistos.shift(); // POP del fondo (el más antiguo)
+  }
+  pilaVistos.push(zapato); // PUSH a la cima
+  renderPila();
+}
 
-    // Muestra los estados de la pila en el panel lateral
-    function renderHistorialPanel() {
-      var lista = document.getElementById('historial-lista');
-      if (pilaHistorial.length === 0) {
-        lista.innerHTML = '<span class="historial-vacio">Sin historial aun</span>';
-        return;
-      }
-      lista.innerHTML = pilaHistorial.slice().reverse().map(function(e, i) {
-        return '<div class="historial-item">' + (i === 0 ? '>' : '-') + ' ' + e.etiqueta + '</div>';
-      }).join('');
-    }
+// POP: saca el elemento de la cima de la pila (el más reciente)
+function popVisto() {
+  if (pilaVistos.length === 0) return null;
+  var z = pilaVistos.pop();
+  renderPila();
+  return z;
+}
 
-    // Guarda el estado actual de los filtros en la pila
-    function guardarEstadoActual(etiqueta) {
-      pushHistorial({
-        etiqueta: etiqueta,
-        categoria: document.getElementById('filtro-categoria').value,
-        color:     document.getElementById('filtro-color').value,
-        texto:     document.getElementById('buscador').value,
-        orden:     document.getElementById('orden').value
-      });
-    }
+// PEEK: mira la cima sin sacarla
+function peekVisto() {
+  return pilaVistos.length > 0 ? pilaVistos[pilaVistos.length - 1] : null;
+}
 
-    // Restaura el estado anterior usando POP
-    function volverAtras() {
-      var anterior = popHistorial();
-      if (!anterior) { mostrarToast('No hay estados anteriores'); return; }
-      document.getElementById('filtro-categoria').value = anterior.categoria;
-      document.getElementById('filtro-color').value     = anterior.color;
-      document.getElementById('buscador').value         = anterior.texto;
-      document.getElementById('orden').value            = anterior.orden;
-      renderizar();
-      mostrarToast('Volviste a: ' + anterior.etiqueta);
-    }
+// Renderiza el panel lateral y la sección "Vistos recientemente"
+function renderPila() {
+  // Panel lateral — de cima a fondo (reverse para mostrar el más reciente arriba)
+  var lista = document.getElementById('historial-lista');
+  if (pilaVistos.length === 0) {
+    lista.innerHTML = '<span class="historial-vacio">Abre un zapato para ver la pila en accion</span>';
+  } else {
+    var invertida = pilaVistos.slice().reverse();
+    lista.innerHTML = invertida.map(function(z, i) {
+      return '<div class="historial-item">' +
+        '<span class="historial-item__num">' + (i + 1) + '</span>' +
+        '<span>' + z.nombre + '</span>' +
+        '</div>';
+    }).join('');
+  }
 
-    // Intercepta filtrarPorCategoria para guardar estado antes de filtrar
-    var _filtrarOriginal = filtrarPorCategoria;
-    filtrarPorCategoria = function(cat) {
-      guardarEstadoActual('Vista anterior');
-      _filtrarOriginal(cat);
-    };
+  // Sección "Vistos recientemente" — mismas tarjetas del catálogo
+  var seccion = document.getElementById('vistos-section');
+  var contenedor = document.getElementById('vistos-catalogo');
+  if (pilaVistos.length === 0) {
+    seccion.style.display = 'none';
+    return;
+  }
+  seccion.style.display = 'block';
+  contenedor.innerHTML = '';
+  // Mostrar de cima a fondo (más reciente primero)
+  pilaVistos.slice().reverse().forEach(function(z) {
+    var tarjeta = crearTarjeta(z);
+    contenedor.appendChild(tarjeta);
+  });
+}
 
-    document.getElementById('filtro-categoria').addEventListener('change', function() {
-      if (this.value) guardarEstadoActual('Filtro: ' + this.value);
-    });
-    document.getElementById('buscador').addEventListener('input', function() {
-      if (this.value.length === 1) guardarEstadoActual('Busqueda anterior');
-    });
+// Intercepta abrirModal para hacer PUSH automático en la pila
+var _abrirModalOriginal = abrirModal;
+abrirModal = function(z) {
+  pushVisto(z);
+  _abrirModalOriginal(z);
+};
 
     // ================================================================
     // ESTRUCTURA DE DATOS 2: COLA (Queue) — FIFO
