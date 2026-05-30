@@ -135,44 +135,42 @@ function estrellas(cal) {
 }
 
 function crearTarjeta(z) {
+
   const art = document.createElement("article");
-  art.className  = "zapato-card";
+  art.className  = "producto-card";
   art.dataset.id = z.id;
   art.innerHTML = `
-    <div class="zapato-card__imagen">
+    <div class="producto-card__imagen">
       <img src="${z.imagen}" alt="${z.nombre}" loading="lazy"
         onerror="this.src='https://placehold.co/600x400/f3f4f6/9ca3af?text=${encodeURIComponent(z.nombre)}'"/>
-      <span class="zapato-card__badge-cat">${z.categoria}</span>
-      ${z.nuevo ? '<span class="zapato-card__badge-nuevo">NUEVO</span>' : ""}
-      <button class="zapato-card__accion" data-id="${z.id}" aria-label="Agregar al carrito">+ Carrito</button>
+      <span class="producto-card__badge-cat">${z.categoria}</span>
+      ${z.nuevo ? '<span class="badge-nuevo">NUEVO</span>' : ""}
+      <button class="btn-agregar" data-id="${z.id}" aria-label="Agregar al carrito">+ Carrito</button>
     </div>
-    <div class="zapato-card__info">
-      <div class="zapato-card__color">
-        <span class="color-dot" style="background:${coloresHex[z.color]};"></span>
-        <span class="zapato-card__color-label">${z.color}</span>
+    <div class="producto-card__info">
+      <div class="producto-card__categoria"><span class="color-dot" style="background:${coloresHex[z.color]}; margin-right:0.5rem"></span>${z.color}</div>
+      <h3 class="producto-card__nombre">${z.nombre}</h3>
+      <p class="producto-card__descripcion">${z.descripcion}</p>
+      <div class="producto-card__pie">
+        <span class="precio">${formatearPrecio(z.precio)}</span>
+        <span class="estrellas" title="${z.calificacion} de 5">${estrellas(z.calificacion)} ${z.calificacion}/5</span>
       </div>
-      <h2 class="zapato-card__nombre">${z.nombre}</h2>
-      <p class="zapato-card__descripcion">${z.descripcion}</p>
-      <div class="zapato-card__pie">
-        <span class="zapato-card__precio">${formatearPrecio(z.precio)}</span>
-        <span class="zapato-card__estrellas" title="${z.calificacion} de 5">${estrellas(z.calificacion)} ${z.calificacion}/5</span>
-      </div>
-      <button class="zapato-card__btn-ver" data-id="${z.id}">Ver detalle</button>
+      <button class="btn-agregar ver-detalle" data-id="${z.id}">Ver detalle</button>
     </div>
   `;
 
   art.addEventListener("click", (e) => {
-    if (e.target.closest(".zapato-card__accion")) return;
-    if (e.target.closest(".zapato-card__btn-ver")) return;
+    if (e.target.closest(".btn-agregar")) return;
+    if (e.target.closest(".ver-detalle")) return;
     abrirModal(z);
   });
 
-  art.querySelector(".zapato-card__accion").addEventListener("click", (e) => {
+  art.querySelector(".btn-agregar").addEventListener("click", (e) => {
     e.stopPropagation();
     agregarAlCarrito(z);
   });
 
-  art.querySelector(".zapato-card__btn-ver").addEventListener("click", (e) => {
+  art.querySelector(".ver-detalle").addEventListener("click", (e) => {
     e.stopPropagation();
     abrirModal(z);
   });
@@ -236,23 +234,21 @@ function filtrarPorCategoria(cat) {
 }
 
 function abrirModal(z) {
-  // Push en la pila cada vez que se abre un modal
-  if (typeof pushVisto === 'function') pushVisto(z);
+  // Abrir modal con detalles del zapato
 
   elModalContenido.innerHTML = `
-    <div class="modal__grid">
-      <img class="modal__img" src="${z.imagen}" alt="${z.nombre}"
+    <div class="modal__producto">
+      <img class="modal__imagen" src="${z.imagen}" alt="${z.nombre}"
         onerror="this.src='https://placehold.co/600x400/f3f4f6/9ca3af?text=${encodeURIComponent(z.nombre)}'"/>
-      <div class="modal__detalles">
+      <div class="modal__datos">
         <p class="modal__categoria">${z.categoria} &middot; ${z.color}</p>
-        <h2 class="modal__nombre">${z.nombre}</h2>
+        <h2>${z.nombre}</h2>
+        <div class="modal__calificacion"><span class="estrellas">${estrellas(z.calificacion)}</span><span class="valor">${z.calificacion}/5</span></div>
         <p class="modal__descripcion">${z.descripcion}</p>
-        <span class="modal__chip">${estrellas(z.calificacion)} ${z.calificacion} / 5</span>
-        <p class="modal__precio">${formatearPrecio(z.precio)}</p>
-        <button class="modal__btn-carrito"
-          onclick="agregarAlCarrito(zapatos.find(x=>x.id===${z.id})); cerrarModal();">
-          Agregar al carrito
-        </button>
+        <div class="modal__precio">
+          <span class="precio-grande">${formatearPrecio(z.precio)}</span>
+          <button class="btn-agregar" onclick="agregarAlCarrito(zapatos.find(x=>x.id===${z.id})); cerrarModal();">Agregar al carrito</button>
+        </div>
       </div>
     </div>
   `;
