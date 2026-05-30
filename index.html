@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>El Paso — Zapatería Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .chat-fab {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 500;
+      width: 58px; height: 58px; background: var(--acento); color: var(--negro);
+      border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(200,151,58,0.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .chat-fab:hover { transform: scale(1.08); box-shadow: 0 10px 32px rgba(200,151,58,0.6); }
+    .chat-fab__badge {
+      position: absolute; top: -4px; right: -4px; background: #dc2626; color: white;
+      font-size: 0.6rem; font-weight: 700; width: 16px; height: 16px;
+      border-radius: 50%; display: none; align-items: center; justify-content: center;
+    }
+    .chat-fab__badge.visible { display: flex; }
+    .chat-ventana {
+      position: fixed; bottom: 5.5rem; right: 2rem; z-index: 500;
+      width: 360px; max-height: 520px; background: white; border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; overflow: hidden;
+      transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .chat-ventana.abierto { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+    .chat-header {
+      background: var(--negro); color: white; padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .chat-header__avatar {
+      width: 36px; height: 36px; background: var(--acento); color: var(--negro);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .chat-header__info { flex: 1; }
+    .chat-header__nombre { font-weight: 700; font-size: 0.9rem; }
+    .chat-header__estado { font-size: 0.72rem; color: rgba(255,255,255,0.6); }
+    .chat-header__estado::before { content: '●'; color: #22c55e; margin-right: 0.3rem; font-size: 0.6rem; }
+    .chat-header__cerrar { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1.25rem; cursor: pointer; }
+    .chat-header__cerrar:hover { color: white; }
+    .chat-mensajes {
+      flex: 1; overflow-y: auto; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.75rem; background: #f8f7f5;
+    }
+    .chat-mensajes::-webkit-scrollbar { width: 4px; }
+    .chat-mensajes::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+    .chat-msg { display: flex; gap: 0.5rem; align-items: flex-end; animation: msg-entra 0.2s ease; }
+    @keyframes msg-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-msg.user { flex-direction: row-reverse; }
+    .chat-msg__avatar {
+      width: 28px; height: 28px; background: var(--acento); color: var(--negro);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; flex-shrink: 0;
+    }
+    .chat-msg__burbuja { max-width: 78%; padding: 0.6rem 0.9rem; border-radius: 14px; font-size: 0.84rem; line-height: 1.55; }
+    .chat-msg.bot  .chat-msg__burbuja { background: white; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; color: #1a1a1a; }
+    .chat-msg.user .chat-msg__burbuja { background: var(--negro); color: white; border-bottom-right-radius: 4px; }
+    .chat-sugerencias { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 1rem; background: #f8f7f5; border-top: 1px solid #e5e7eb; }
+    .chat-chip {
+      background: white; border: 1px solid #e5e7eb; border-radius: 999px;
+      padding: 0.3rem 0.7rem; font-size: 0.72rem; cursor: pointer; color: #3d3d3d;
+      transition: border-color 0.2s, background 0.2s; white-space: nowrap;
+    }
+    .chat-chip:hover { border-color: var(--acento); background: #fef9ee; }
+    .chat-typing span {
+      display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+      background: #9ca3af; margin: 0 1.5px; animation: typing 1s infinite;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes typing { 0%,80%,100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-4px); opacity: 1; } }
+    .chat-input-area { display: flex; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; background: white; }
+    .chat-input {
+      flex: 1; border: 1.5px solid #e5e7eb; border-radius: 999px;
+      padding: 0.5rem 0.9rem; font-size: 0.84rem; outline: none;
+      transition: border-color 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .chat-input:focus { border-color: var(--acento); }
+    .chat-send {
+      width: 36px; height: 36px; background: var(--acento); color: var(--negro);
+      border: none; border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; flex-shrink: 0; transition: transform 0.15s;
+    }
+    .chat-send:hover { transform: scale(1.08); }
+    .chat-send:disabled { opacity: 0.35; cursor: not-allowed; }
+    .historial-panel {
+      position: fixed; top: 70px; left: 1rem; z-index: 90;
+      background: white; border: 1px solid #e5e7eb; border-radius: 14px;
+      padding: 0.75rem; width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); font-size: 0.75rem;
+    }
+    .historial-panel__titulo {
+      font-weight: 700; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #6b7280; margin-bottom: 0.5rem;
+    }
+    .historial-panel__lista { display: flex; flex-direction: column; gap: 0.3rem; }
+    .historial-item {
+      padding: 0.3rem 0.5rem; border-radius: 6px;
+      background: #f3f4f6; color: #3d3d3d; font-size: 0.72rem;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .historial-item:first-child { background: #fef9ee; border: 1px solid #f5e6c8; color: #7c5c1a; font-weight: 600; }
+    .historial-btn-volver {
+      width: 100%; margin-top: 0.5rem; padding: 0.4rem;
+      background: var(--negro); color: white; border: none; border-radius: 8px;
+      font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .historial-btn-volver:hover { background: var(--acento); color: var(--negro); }
+    .historial-vacio { color: #9ca3af; font-size: 0.7rem; font-style: italic; }
+    .seccion-problema { background: var(--negro); color: white; padding: 4rem 2rem; }
+    .seccion-problema__inner {
+      max-width: 1280px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    .seccion-problema h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.75rem,3vw,2.5rem); line-height: 1.15; margin-bottom: 1.25rem; }
+    .seccion-problema h2 em { color: var(--acento); font-style: italic; }
+    .seccion-problema p { color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.75; margin-bottom: 1rem; }
+    .problema-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .problema-card {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .problema-card__icon { font-size: 1.5rem; flex-shrink: 0; }
+    .problema-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--acento); }
+    .problema-card p { font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 0; }
+    @media (max-width: 480px) {
+      .chat-ventana { width: calc(100vw - 2rem); right: 1rem; }
+      .historial-panel { display: none; }
+      .seccion-problema__inner { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar__logo">
+      <span class="navbar__logo-icon">EP</span>
+      <span class="navbar__logo-text">El Paso</span>
+    </div>
+    <div class="navbar__links">
+      <a href="#catalogo-section">Catalogo</a>
+      <a href="#categorias-section">Categorias</a>
+      <a href="#problema-section">Problematica</a>
+      <a href="#nosotros-section">Nosotros</a>
+    </div>
+    <button class="navbar__carrito" id="btn-carrito" aria-label="Ver carrito">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="navbar__carrito-count" id="carrito-count">0</span>
+    </button>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__bg">
+      <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1400&q=80" alt="Zapato deportivo destacado" class="hero__bg-img"/>
+      <div class="hero__overlay"></div>
+    </div>
+    <div class="hero__contenido">
+      <p class="hero__eyebrow">Nueva coleccion 2025</p>
+      <h1 class="hero__titulo">El par perfecto<br/><em>te esta esperando</em></h1>
+      <p class="hero__descripcion">Mas de 16 modelos seleccionados para cada estilo, con un asistente inteligente que te ayuda a elegir el ideal para ti.</p>
+      <div class="hero__acciones">
+        <a href="#catalogo-section" class="btn btn--primario">Ver catalogo</a>
+        <a href="#categorias-section" class="btn btn--secundario">Por categoria</a>
+      </div>
+    </div>
+    <div class="hero__stats">
+      <div class="hero__stat"><strong>16</strong><span>modelos</span></div>
+      <div class="hero__stat"><strong>4</strong><span>categorias</span></div>
+      <div class="hero__stat"><strong>5</strong><span>colores</span></div>
+      <div class="hero__stat"><strong>4.8</strong><span>calificacion</span></div>
+    </div>
+  </header>
+
+  <div class="banda-confianza">
+    <span>Envio gratis desde $800</span>
+    <span class="separador">|</span>
+    <span>Cambios sin costo en 30 dias</span>
+    <span class="separador">|</span>
+    <span>Garantia de calidad</span>
+    <span class="separador">|</span>
+    <span>Asesor virtual 24/7</span>
+  </div>
+
+  <main>
+
+    <section id="problema-section" class="seccion-problema">
+      <div class="seccion-problema__inner">
+        <div>
+          <p class="hero__eyebrow" style="color:var(--acento)">La problematica</p>
+          <h2>Comprar zapatos en linea es<br/><em>un riesgo innecesario</em></h2>
+          <p>El 67% de los compradores en linea de calzado devuelven su compra por haber elegido el modelo equivocado. El problema no es el catalogo: es la falta de orientacion personalizada durante la decision de compra.</p>
+          <p>Los filtros estandar de categoria y color no son suficientes. El comprador necesita saber si un zapato es adecuado para su estilo de vida, su ocasion de uso y su presupuesto, sin tener que recorrer toda la tienda para saberlo.</p>
+          <p style="color:rgba(255,255,255,0.5);font-size:0.82rem"><strong style="color:var(--acento)">Solucion:</strong> El Paso integra un asistente conversacional que conoce todo el catalogo y guia al comprador hacia el par correcto antes de que llegue al carrito.</p>
+        </div>
+        <div class="problema-cards">
+          <div class="problema-card">
+            <div class="problema-card__icon">X</div>
+            <div>
+              <h4>Sin orientacion personalizada</h4>
+              <p>Los catalogos muestran todos los productos igual. El comprador no sabe cual es el mas adecuado para su necesidad especifica.</p>
+            </div>
+          </div>
+          <div class="problema-card">
+            <div class="problema-card__icon">~</div>
+            <div>
+              <h4>Altas tasas de devolucion</h4>
+              <p>El calzado es el producto con mayor devolucion en e-commerce. La causa principal: malas decisiones de compra por desinformacion.</p>
+            </div>
+          </div>
+          <div class="problema-card">
+            <div class="problema-card__icon">OK</div>
+            <div>
+              <h4>Nuestra solucion: asesor IA</h4>
+              <p>Un chatbot que conoce el catalogo completo y responde preguntas en tiempo real para ayudarte a elegir el par correcto.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categorias-section" class="seccion">
+      <div class="seccion__cabecera">
+        <h2 class="seccion__titulo">Explora por categoria</h2>
+        <p class="seccion__subtitulo">Elige el estilo que mejor se adapta a tu dia</p>
+      </div>
+      <div class="categorias-grid">
+        <button class="categoria-card" data-cat="Deportivo">
+          <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=75" alt="Deportivo"/>
+          <div class="categoria-card__overlay"><h3>Deportivo</h3><p>4 modelos</p></div>
+        </button>
+        <button class="categoria-card" data-cat="Casual">
+          <img src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&q=75" alt="Casual"/>
+          <div class="categoria-card__overlay"><h3>Casual</h3><p>4 modelos</p></div>
+        </button>
+        <button class="categoria-card" data-cat="Formal">
+          <img src="https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=600&q=75" alt="Formal"/>
+          <div class="categoria-card__overlay"><h3>Formal</h3><p>4 modelos</p></div>
+        </button>
+        <button class="categoria-card" data-cat="Sandalia">
+          <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?w=600&q=75" alt="Sandalia"/>
+          <div class="categoria-card__overlay"><h3>Sandalia</h3><p>4 modelos</p></div>
+        </button>
+      </div>
+    </section>
+
+    <section id="catalogo-section" class="seccion">
+      <div class="seccion__cabecera">
+        <h2 class="seccion__titulo">Catalogo completo</h2>
+        <p class="seccion__subtitulo">Busca, filtra y encuentra tu proximo par</p>
+      </div>
+      <div class="controles">
+        <div class="controles__campo">
+          <svg class="controles__icono" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="buscador" placeholder="Buscar por nombre..." />
+        </div>
+        <select id="filtro-categoria">
+          <option value="">Todas las categorias</option>
+          <option value="Deportivo">Deportivo</option>
+          <option value="Casual">Casual</option>
+          <option value="Formal">Formal</option>
+          <option value="Sandalia">Sandalia</option>
+        </select>
+        <select id="filtro-color">
+          <option value="">Todos los colores</option>
+          <option value="Negro">Negro</option>
+          <option value="Blanco">Blanco</option>
+          <option value="Cafe">Cafe</option>
+          <option value="Gris">Gris</option>
+          <option value="Azul">Azul</option>
+        </select>
+        <select id="orden">
+          <option value="recomendado">Recomendados</option>
+          <option value="precioAsc">Precio: menor a mayor</option>
+          <option value="precioDesc">Precio: mayor a menor</option>
+        </select>
+        <button id="btn-limpiar" class="btn-limpiar">Limpiar</button>
+      </div>
+      <div class="catalogo-meta">
+        <p id="contador" class="contador"></p>
+        <div class="filtros-activos" id="filtros-activos"></div>
+      </div>
+      <div id="catalogo" class="catalogo"></div>
+      <div id="sin-resultados" class="sin-resultados oculto">
+        <div class="sin-resultados__icono">buscar</div>
+        <h3>Sin resultados</h3>
+        <p>No encontramos zapatos con esos filtros.</p>
+        <button onclick="limpiarFiltros()" class="btn btn--primario">Ver todos</button>
+      </div>
+    </section>
+
+    <section id="nosotros-section" class="seccion nosotros">
+      <div class="nosotros__imagen">
+        <img src="https://images.unsplash.com/photo-1556906781-9a412961a28c?w=800&q=80" alt="Taller de zapateria"/>
+      </div>
+      <div class="nosotros__texto">
+        <p class="hero__eyebrow">Nuestra historia</p>
+        <h2>Calzado con proposito,<br/>diseno con alma</h2>
+        <p>En El Paso llevamos mas de 10 anos seleccionando los mejores modelos para quienes entienden que un buen par de zapatos no es un lujo, es una inversion en comodidad y estilo.</p>
+        <p>Cada modelo pasa por un proceso de seleccion estricto. Ahora con nuestro asistente virtual, encontrar el par correcto es mas facil que nunca.</p>
+        <div class="nosotros__numeros">
+          <div><strong>+10</strong><span>anos de experiencia</span></div>
+          <div><strong>+2.000</strong><span>clientes satisfechos</span></div>
+          <div><strong>100%</strong><span>calidad garantizada</span></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__contenido">
+      <div class="footer__marca">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem">
+          <span class="navbar__logo-icon">EP</span>
+          <span class="navbar__logo-text" style="color:white">El Paso</span>
+        </div>
+        <p>Zapateria premium. Calidad que se siente.</p>
+      </div>
+      <div class="footer__links">
+        <h4>Navegacion</h4>
+        <a href="#catalogo-section">Catalogo</a>
+        <a href="#categorias-section">Categorias</a>
+        <a href="#nosotros-section">Nosotros</a>
+      </div>
+      <div class="footer__links">
+        <h4>Categorias</h4>
+        <a href="#" onclick="filtrarPorCategoria('Deportivo')">Deportivo</a>
+        <a href="#" onclick="filtrarPorCategoria('Casual')">Casual</a>
+        <a href="#" onclick="filtrarPorCategoria('Formal')">Formal</a>
+        <a href="#" onclick="filtrarPorCategoria('Sandalia')">Sandalia</a>
+      </div>
+      <div class="footer__links">
+        <h4>Contacto</h4>
+        <span>Medellin, Colombia</span>
+        <span>310 000 0000</span>
+        <span>hola@elpaso.co</span>
+      </div>
+    </div>
+    <div class="footer__base"><p>2025 El Paso Zapateria - Proyecto educativo UCC</p></div>
+  </footer>
+
+  <div id="modal" class="modal oculto" role="dialog" aria-modal="true">
+    <div class="modal__backdrop" id="modal-backdrop"></div>
+    <div class="modal__caja">
+      <button class="modal__cerrar" id="modal-cerrar" aria-label="Cerrar">&times;</button>
+      <div id="modal-contenido"></div>
+    </div>
+  </div>
+
+  <div id="panel-carrito" class="panel-carrito oculto">
+    <div class="panel-carrito__backdrop" id="carrito-backdrop"></div>
+    <div class="panel-carrito__caja">
+      <div class="panel-carrito__cabecera">
+        <h3>Tu carrito</h3>
+        <button id="cerrar-carrito" aria-label="Cerrar carrito">&times;</button>
+      </div>
+      <div id="carrito-items" class="carrito-items"></div>
+      <div class="panel-carrito__pie">
+        <div class="carrito-total">
+          <span>Total</span>
+          <strong id="carrito-total">$0.00</strong>
+        </div>
+        <button class="btn btn--primario" style="width:100%" onclick="alert('Gracias por tu compra!')">Finalizar compra</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast oculto"><span id="toast-msg"></span></div>
+
+  <div class="historial-panel" id="historial-panel">
+    <div class="historial-panel__titulo">Pila de navegacion</div>
+    <div class="historial-panel__lista" id="historial-lista">
+      <span class="historial-vacio">Sin historial aun</span>
+    </div>
+    <button class="historial-btn-volver" onclick="volverAtras()">Volver</button>
+  </div>
+
+  <button class="chat-fab" id="chat-fab" title="Asesor virtual">
+    chat
+    <span class="chat-fab__badge" id="chat-badge">1</span>
+  </button>
+
+  <div class="chat-ventana" id="chat-ventana">
+    <div class="chat-header">
+      <div class="chat-header__avatar">EP</div>
+      <div class="chat-header__info">
+        <div class="chat-header__nombre">Asistente El Paso</div>
+        <div class="chat-header__estado">En linea ahora</div>
+      </div>
+      <button class="chat-header__cerrar" id="chat-cerrar">&times;</button>
+    </div>
+    <div class="chat-mensajes" id="chat-mensajes"></div>
+    <div class="chat-sugerencias">
+      <button class="chat-chip" onclick="enviarChip('Que modelos tienen para correr?')">Para correr</button>
+      <button class="chat-chip" onclick="enviarChip('Cual es el mas barato?')">Mas baratos</button>
+      <button class="chat-chip" onclick="enviarChip('Necesito algo formal')">Formales</button>
+      <button class="chat-chip" onclick="enviarChip('Tienen sandalias?')">Sandalias</button>
+    </div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="chat-input" type="text" placeholder="Pregunta por categoria, color, precio..." />
+      <button class="chat-send" id="chat-send">-&gt;</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // ================================================================
+    // ESTRUCTURA DE DATOS 1: PILA (Stack) — LIFO
+    // Guarda el historial de filtros del catalogo.
+    // LIFO: lo ultimo en entrar es lo primero en salir.
+    // Cada vez que el usuario filtra, el estado anterior se guarda.
+    // Al presionar Volver, se recupera ese estado con pop().
+    // ================================================================
+    const MAX_PILA = 5;
+    let pilaHistorial = [];
+
+    // PUSH: empuja un estado a la cima de la pila
+    function pushHistorial(estado) {
+      if (pilaHistorial.length >= MAX_PILA) pilaHistorial.shift();
+      pilaHistorial.push(estado);
+      renderHistorialPanel();
+    }
+
+    // POP: saca el estado de la cima de la pila
+    function popHistorial() {
+      if (pilaHistorial.length === 0) return null;
+      var estado = pilaHistorial.pop();
+      renderHistorialPanel();
+      return estado;
+    }
+
+    // Muestra los estados de la pila en el panel lateral
+    function renderHistorialPanel() {
+      var lista = document.getElementById('historial-lista');
+      if (pilaHistorial.length === 0) {
+        lista.innerHTML = '<span class="historial-vacio">Sin historial aun</span>';
+        return;
+      }
+      lista.innerHTML = pilaHistorial.slice().reverse().map(function(e, i) {
+        return '<div class="historial-item">' + (i === 0 ? '>' : '-') + ' ' + e.etiqueta + '</div>';
+      }).join('');
+    }
+
+    // Guarda el estado actual de los filtros en la pila
+    function guardarEstadoActual(etiqueta) {
+      pushHistorial({
+        etiqueta: etiqueta,
+        categoria: document.getElementById('filtro-categoria').value,
+        color:     document.getElementById('filtro-color').value,
+        texto:     document.getElementById('buscador').value,
+        orden:     document.getElementById('orden').value
+      });
+    }
+
+    // Restaura el estado anterior usando POP
+    function volverAtras() {
+      var anterior = popHistorial();
+      if (!anterior) { mostrarToast('No hay estados anteriores'); return; }
+      document.getElementById('filtro-categoria').value = anterior.categoria;
+      document.getElementById('filtro-color').value     = anterior.color;
+      document.getElementById('buscador').value         = anterior.texto;
+      document.getElementById('orden').value            = anterior.orden;
+      renderizar();
+      mostrarToast('Volviste a: ' + anterior.etiqueta);
+    }
+
+    // Intercepta filtrarPorCategoria para guardar estado antes de filtrar
+    var _filtrarOriginal = filtrarPorCategoria;
+    filtrarPorCategoria = function(cat) {
+      guardarEstadoActual('Vista anterior');
+      _filtrarOriginal(cat);
+    };
+
+    document.getElementById('filtro-categoria').addEventListener('change', function() {
+      if (this.value) guardarEstadoActual('Filtro: ' + this.value);
+    });
+    document.getElementById('buscador').addEventListener('input', function() {
+      if (this.value.length === 1) guardarEstadoActual('Busqueda anterior');
+    });
+
+    // ================================================================
+    // ESTRUCTURA DE DATOS 2: COLA (Queue) — FIFO
+    // Almacena el historial de mensajes del chatbot.
+    // FIFO: el primer mensaje en entrar es el primero en salir.
+    // Maximo 10 mensajes; cuando se llena, el mas antiguo sale.
+    // ================================================================
+    var MAX_COLA = 10;
+    var colaChat = [];
+
+    function enqueueChat(msg) {
+      colaChat.push(msg);
+      if (colaChat.length > MAX_COLA) colaChat.shift();
+    }
+
+    // ================================================================
+    // MOTOR DEL CHATBOT — Sin API key
+    // Detecta intenciones con palabras clave y responde con datos
+    // reales del arreglo zapatos definido en app.js.
+    // ================================================================
+    function generarRespuesta(texto) {
+      var t = texto.toLowerCase().trim();
+
+      if (/hola|buenas|hey|buenos|saludos/.test(t))
+        return 'Hola! Soy el asesor de El Paso. Tenemos ' + zapatos.length + ' modelos en 4 categorias. Que tipo de zapato buscas?';
+
+      if (/barato|economico|menor precio|mas barato|precio bajo/.test(t)) {
+        var top = zapatos.slice().sort(function(a,b){return a.precio-b.precio;}).slice(0,3);
+        return 'Los mas economicos son:\n\n' + top.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' (' + z.categoria + ')'; }).join('\n');
+      }
+
+      if (/caro|premium|lujo|mayor precio/.test(t)) {
+        var top = zapatos.slice().sort(function(a,b){return b.precio-a.precio;}).slice(0,3);
+        return 'Nuestros modelos premium:\n\n' + top.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString(); }).join('\n');
+      }
+
+      if (/deport|correr|runner|ejercicio|gym|entrenar|maraton|senderismo/.test(t)) {
+        var dep = zapatos.filter(function(z){return z.categoria==='Deportivo';});
+        return 'Para deporte tenemos ' + dep.length + ' modelos:\n\n' + dep.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' ' + z.color; }).join('\n');
+      }
+
+      if (/formal|oficina|trabajo|elegante|reunion|ejecutivo|traje/.test(t)) {
+        var form = zapatos.filter(function(z){return z.categoria==='Formal';});
+        return 'Para ocasiones formales:\n\n' + form.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' ' + z.color; }).join('\n');
+      }
+
+      if (/casual|diario|calle|urbano|fin de semana/.test(t)) {
+        var cas = zapatos.filter(function(z){return z.categoria==='Casual';});
+        return 'Modelos casuales:\n\n' + cas.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString(); }).join('\n');
+      }
+
+      if (/sandalia|sandalias|playa|verano|calor/.test(t)) {
+        var san = zapatos.filter(function(z){return z.categoria==='Sandalia';});
+        return 'Sandalias disponibles:\n\n' + san.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' ' + z.color; }).join('\n');
+      }
+
+      var coloresMap = {negro:'Negro', blanco:'Blanco', cafe:'Cafe', gris:'Gris', azul:'Azul'};
+      for (var clave in coloresMap) {
+        if (t.indexOf(clave) !== -1) {
+          var valor = coloresMap[clave];
+          var filtrados = zapatos.filter(function(z){return z.color===valor;});
+          if (filtrados.length > 0)
+            return 'Modelos en color ' + valor + ':\n\n' + filtrados.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' (' + z.categoria + ')'; }).join('\n');
+        }
+      }
+
+      if (/nuevo|novedad|reciente|lanzamiento/.test(t)) {
+        var nuevos = zapatos.filter(function(z){return z.nuevo;});
+        return 'Novedades 2025:\n\n' + nuevos.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString() + ' (' + z.categoria + ')'; }).join('\n');
+      }
+
+      if (/mejor calificado|mejor valorado|recomendado|estrella/.test(t)) {
+        var top = zapatos.slice().sort(function(a,b){return b.calificacion-a.calificacion;}).slice(0,3);
+        return 'Los mejor calificados:\n\n' + top.map(function(z){ return '- ' + z.nombre + ' ' + z.calificacion + '/5 $' + z.precio.toLocaleString(); }).join('\n');
+      }
+
+      var matchPrecio = t.match(/(\d{3,})\s*(a|hasta|-)\s*(\d{3,})/);
+      if (matchPrecio) {
+        var min = parseInt(matchPrecio[1]), max = parseInt(matchPrecio[3]);
+        var rango = zapatos.filter(function(z){return z.precio>=min && z.precio<=max;});
+        if (rango.length > 0) return 'Entre $' + min.toLocaleString() + ' y $' + max.toLocaleString() + ':\n\n' + rango.map(function(z){ return '- ' + z.nombre + ' $' + z.precio.toLocaleString(); }).join('\n');
+        return 'No encontre modelos en ese rango. El minimo es $849 y el maximo $1,699.';
+      }
+
+      var porNombre = null;
+      for (var i=0; i<zapatos.length; i++) {
+        if (zapatos[i].nombre.toLowerCase().indexOf(t) !== -1 || t.indexOf(zapatos[i].nombre.toLowerCase()) !== -1) {
+          porNombre = zapatos[i]; break;
+        }
+      }
+      if (porNombre)
+        return porNombre.nombre + '\n\nCategoria: ' + porNombre.categoria + '\nColor: ' + porNombre.color + '\nPrecio: $' + porNombre.precio.toLocaleString() + '\nCalificacion: ' + porNombre.calificacion + '/5\n\n' + porNombre.descripcion;
+
+      if (/cuantos|total|todos/.test(t))
+        return 'Tenemos ' + zapatos.length + ' modelos:\n- Deportivo: ' + zapatos.filter(function(z){return z.categoria==='Deportivo';}).length + '\n- Casual: ' + zapatos.filter(function(z){return z.categoria==='Casual';}).length + '\n- Formal: ' + zapatos.filter(function(z){return z.categoria==='Formal';}).length + '\n- Sandalia: ' + zapatos.filter(function(z){return z.categoria==='Sandalia';}).length;
+
+      if (/envio|entrega|devolucion|cambio/.test(t))
+        return 'Envio gratis en compras mayores a $800. Cambios sin costo en 30 dias.';
+
+      if (/gracias|perfecto|excelente|genial/.test(t))
+        return 'De nada! Fue un placer asesorarte. Si tienes mas preguntas aqui estare.';
+
+      return 'Puedo ayudarte con:\n\n- Buscar por categoria (deportivo, casual, formal, sandalia)\n- Filtrar por color o precio\n- Ver novedades o los mejor calificados\n\nQue necesitas?';
+    }
+
+    // ================================================================
+    // INTERFAZ DEL CHATBOT
+    // ================================================================
+    var chatVentana  = document.getElementById('chat-ventana');
+    var chatFab      = document.getElementById('chat-fab');
+    var chatCerrar   = document.getElementById('chat-cerrar');
+    var chatMensajes = document.getElementById('chat-mensajes');
+    var chatInput    = document.getElementById('chat-input');
+    var chatSend     = document.getElementById('chat-send');
+    var chatBadge    = document.getElementById('chat-badge');
+    var chatAbierto  = false;
+
+    chatFab.addEventListener('click', function() {
+      chatAbierto = !chatAbierto;
+      chatVentana.classList.toggle('abierto', chatAbierto);
+      chatFab.textContent = chatAbierto ? 'X' : 'chat';
+      chatBadge.classList.remove('visible');
+      if (chatAbierto) chatInput.focus();
+    });
+
+    chatCerrar.addEventListener('click', function() {
+      chatAbierto = false;
+      chatVentana.classList.remove('abierto');
+      chatFab.textContent = 'chat';
+    });
+
+    function agregarMensajeChat(rol, texto) {
+      var div = document.createElement('div');
+      div.className = 'chat-msg ' + rol;
+      if (rol === 'bot') {
+        div.innerHTML = '<div class="chat-msg__avatar">EP</div><div class="chat-msg__burbuja">' + texto.replace(/\n/g, '<br>') + '</div>';
+      } else {
+        div.innerHTML = '<div class="chat-msg__burbuja">' + texto + '</div>';
+      }
+      chatMensajes.appendChild(div);
+      chatMensajes.scrollTop = chatMensajes.scrollHeight;
+      enqueueChat({ rol: rol, texto: texto });
+    }
+
+    function mostrarTyping() {
+      var div = document.createElement('div');
+      div.className = 'chat-msg bot'; div.id = 'chat-typing';
+      div.innerHTML = '<div class="chat-msg__avatar">EP</div><div class="chat-msg__burbuja chat-typing"><span></span><span></span><span></span></div>';
+      chatMensajes.appendChild(div);
+      chatMensajes.scrollTop = chatMensajes.scrollHeight;
+    }
+
+    function quitarTyping() {
+      var el = document.getElementById('chat-typing');
+      if (el) el.remove();
+    }
+
+    function procesarMensaje(texto) {
+      if (!texto.trim()) return;
+      agregarMensajeChat('user', texto);
+      chatInput.value = '';
+      chatSend.disabled = true;
+      mostrarTyping();
+      setTimeout(function() {
+        quitarTyping();
+        agregarMensajeChat('bot', generarRespuesta(texto));
+        chatSend.disabled = false;
+        chatInput.focus();
+        if (!chatAbierto) chatBadge.classList.add('visible');
+      }, 600 + Math.random() * 400);
+    }
+
+    function enviarChip(texto) {
+      if (!chatAbierto) { chatAbierto = true; chatVentana.classList.add('abierto'); chatFab.textContent = 'X'; }
+      procesarMensaje(texto);
+    }
+
+    chatSend.addEventListener('click', function() { procesarMensaje(chatInput.value); });
+    chatInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') procesarMensaje(chatInput.value); });
+
+    setTimeout(function() {
+      agregarMensajeChat('bot', 'Hola! Soy tu asesor personal de El Paso. Cuentame que tipo de zapato buscas y te ayudo a encontrar el par perfecto.');
+      chatBadge.classList.add('visible');
+    }, 1500);
+  </script>
+</body>
+</html>
