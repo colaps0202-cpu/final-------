@@ -314,6 +314,14 @@
       </div>
     </section>
 
+    <section id="seccion-vistos-recientemente" class="seccion vistos-recientemente oculto">
+      <div class="seccion__cabecera">
+        <h2 class="seccion__titulo">Vistos recientemente</h2>
+        <p class="seccion__subtitulo">Los zapatos que acabas de revisar</p>
+      </div>
+      <div class="vistos-grid catalogo"></div>
+    </section>
+
   </main>
 
   <footer class="footer">
@@ -377,11 +385,11 @@
   <div id="toast" class="toast oculto"><span id="toast-msg"></span></div>
 
   <div class="historial-panel" id="historial-panel">
-    <div class="historial-panel__titulo">Pila de navegacion</div>
+    <div class="historial-panel__titulo">Últimos vistos</div>
     <div class="historial-panel__lista" id="historial-lista">
       <span class="historial-vacio">Sin historial aun</span>
     </div>
-    <button class="historial-btn-volver" onclick="volverAtras()">Volver</button>
+    <button class="historial-btn-volver" onclick="pilaUltimosVistos=[];renderHistorialPanel();renderUltimosVistos();mostrarToast('Historial limpiado')">Limpiar</button>
   </div>
 
   <button class="chat-fab" id="chat-fab" title="Asesor virtual">
@@ -414,77 +422,19 @@
   <script src="app.js"></script>
   <script>
     // ================================================================
-    // ESTRUCTURA DE DATOS 1: PILA (Stack) — LIFO
-    // Guarda el historial de filtros del catalogo.
-    // LIFO: lo ultimo en entrar es lo primero en salir.
-    // Cada vez que el usuario filtra, el estado anterior se guarda.
-    // Al presionar Volver, se recupera ese estado con pop().
+    // ESTRUCTURA DE DATOS 1: PILA (Stack) — ÚLTIMOS VISTOS
+    // Implementada en app.js
+    // Se usa en abrirModal() para guardar los últimos 5 zapatos vistos
     // ================================================================
-    const MAX_PILA = 5;
-    let pilaHistorial = [];
-
-    // PUSH: empuja un estado a la cima de la pila
-    function pushHistorial(estado) {
-      if (pilaHistorial.length >= MAX_PILA) pilaHistorial.shift();
-      pilaHistorial.push(estado);
+    // Las funciones ya están definidas en app.js:
+    // - pushUltimosVistos(id)
+    // - renderHistorialPanel()
+    // - renderUltimosVistos()
+    
+    // Inicializar renderHistorialPanel al cargar
+    document.addEventListener('DOMContentLoaded', function() {
       renderHistorialPanel();
-    }
-
-    // POP: saca el estado de la cima de la pila
-    function popHistorial() {
-      if (pilaHistorial.length === 0) return null;
-      var estado = pilaHistorial.pop();
-      renderHistorialPanel();
-      return estado;
-    }
-
-    // Muestra los estados de la pila en el panel lateral
-    function renderHistorialPanel() {
-      var lista = document.getElementById('historial-lista');
-      if (pilaHistorial.length === 0) {
-        lista.innerHTML = '<span class="historial-vacio">Sin historial aun</span>';
-        return;
-      }
-      lista.innerHTML = pilaHistorial.slice().reverse().map(function(e, i) {
-        return '<div class="historial-item">' + (i === 0 ? '>' : '-') + ' ' + e.etiqueta + '</div>';
-      }).join('');
-    }
-
-    // Guarda el estado actual de los filtros en la pila
-    function guardarEstadoActual(etiqueta) {
-      pushHistorial({
-        etiqueta: etiqueta,
-        categoria: document.getElementById('filtro-categoria').value,
-        color:     document.getElementById('filtro-color').value,
-        texto:     document.getElementById('buscador').value,
-        orden:     document.getElementById('orden').value
-      });
-    }
-
-    // Restaura el estado anterior usando POP
-    function volverAtras() {
-      var anterior = popHistorial();
-      if (!anterior) { mostrarToast('No hay estados anteriores'); return; }
-      document.getElementById('filtro-categoria').value = anterior.categoria;
-      document.getElementById('filtro-color').value     = anterior.color;
-      document.getElementById('buscador').value         = anterior.texto;
-      document.getElementById('orden').value            = anterior.orden;
-      renderizar();
-      mostrarToast('Volviste a: ' + anterior.etiqueta);
-    }
-
-    // Intercepta filtrarPorCategoria para guardar estado antes de filtrar
-    var _filtrarOriginal = filtrarPorCategoria;
-    filtrarPorCategoria = function(cat) {
-      guardarEstadoActual('Vista anterior');
-      _filtrarOriginal(cat);
-    };
-
-    document.getElementById('filtro-categoria').addEventListener('change', function() {
-      if (this.value) guardarEstadoActual('Filtro: ' + this.value);
-    });
-    document.getElementById('buscador').addEventListener('input', function() {
-      if (this.value.length === 1) guardarEstadoActual('Busqueda anterior');
+      renderUltimosVistos();
     });
 
     // ================================================================
